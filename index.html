@@ -5,13 +5,16 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Poppins', "sans-serif"]
+                        sans: ['Space Grotesk', "sans-serif"],
+                        mono: ['DM Mono', 'monospace']
                     }
 
                 }
@@ -19,81 +22,419 @@
         }
     </script>
     <style>
-        #spinner {
-            display: none
+        :root {
+            --ink: #1c1f26;
+            --accent: #ff7a59;
+            --accent-2: #3f7cff;
+            --bg-1: #fff7ed;
+            --bg-2: #eef2ff;
+        }
+
+        body {
+            font-family: "Space Grotesk", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 20% 20%, rgba(63, 124, 255, 0.2), transparent 45%),
+                radial-gradient(circle at 80% 10%, rgba(255, 122, 89, 0.18), transparent 40%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+            backdrop-filter: blur(14px);
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .field-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .field {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px 14px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .field:focus {
+            outline: none;
+            border-color: var(--accent-2);
+            box-shadow: 0 0 0 3px rgba(63, 124, 255, 0.2);
+        }
+
+        .helper {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .color-field {
+            width: 100%;
+            height: 46px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            padding: 4px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(120deg, var(--accent-2), var(--accent));
+            color: #ffffff;
+            padding: 12px 18px;
+            box-shadow: 0 10px 24px rgba(63, 124, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 26px rgba(63, 124, 255, 0.35);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #1f2937;
+            border: 1px solid #e2e8f0;
+            padding: 12px 18px;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        .is-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .toggle {
+            appearance: none;
+            width: 46px;
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .toggle::after {
+            content: "";
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: #ffffff;
+            position: absolute;
+            top: 3px;
+            left: 4px;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+        }
+
+        .toggle:checked {
+            background: var(--accent-2);
+        }
+
+        .toggle:checked::after {
+            transform: translateX(20px);
+        }
+
+        .qr-frame {
+            min-height: 320px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5f5;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        #qrcode canvas,
+        #qrcode img {
+            border-radius: 12px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.15);
+            animation: floatIn 0.3s ease;
+        }
+
+        #qr-placeholder {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        #payload-preview {
+            font-family: "DM Mono", monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        #status[data-tone="error"] {
+            color: #dc2626;
+        }
+
+        #status[data-tone="success"] {
+            color: #059669;
+        }
+
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
     </style>
     <title>QR Code Generator</title>
-
 </head>
 
 <body>
-    <header class="bg-red-500 p-4 mb-10">
-        <div class="max-w-5xl m-auto">
-            <div class="text-xl font-bold text-white">QR Code Generator</div>
-
+    <header class="pt-10 pb-6">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="h-12 w-12 rounded-2xl bg-white/80 border border-white shadow-sm flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                            class="h-6 w-6 text-slate-700">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M7 7h4v4H7V7zm6 6h4v4h-4v-4zM7 13h4v4H7v-4zM3 3h6v6H3V3zm12 0h6v6h-6V3zM3 15h6v6H3v-6zm12 6v-2m0-10v2m-10 6h2m6 0h2" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.3em] text-slate-500">QR Studio</p>
+                        <h1 class="text-3xl font-semibold">Smart QR Code Generator</h1>
+                        <p class="text-slate-600 mt-2">Build dynamic QR codes that look sharp and scan instantly.</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="chip">Instant render</span>
+                    <span class="chip">Wi-Fi + SMS</span>
+                    <span class="chip">Style controls</span>
+                </div>
+            </div>
         </div>
-
-
-
-
     </header>
-    <main>
-        <div class="flex flex-col-reverse align-center justify-center p-10 m-auto md:max-w-4xl md:flex-row">
-            <div class="d1 w-full md:w-2/3 mr-24">
-                <h1 class="text-3xl font-bold mb-5 md:text-4xl">Generate QR Code</h1>
-                <p class="mb-4">QR codes unlock seemless experience for mobile users</p>
-                <p>Enter your URL below to generate a QR Code and download the same </p>
-                <form id="generate-form" class="mt-4">
-                    <input type="url" id="url" placeholder="Enter a URL"
-                        class="w-full border-2 border-blue-200 rounded p-3 text-gray-dark mr-2 focus:outline-none mb-5">
-                    <select name="" id="size"
-                        class="w-full border-2 border-blue-200 rounded p-3 text-gray-dark mr-2 focus:outline-none mb-5">
-                        <option value="100">100x100</option>
-                        <option value="200">200x200</option>
-                        <option value="300" selected>300x300</option>
-                        <option value="400">400x400</option>
-                        <option value="500">500x500</option>
-                        <option value="600">600x600</option>
-                        <option value="700">700x700</option>
 
-                    </select>
-                    <button class="bg-blue-600 rounded w-full text-white py-3 px-4 mt-5 hover:bg-red-700" type="submit">
-                        Generate</button>
+    <main class="max-w-6xl mx-auto px-6 pb-16">
+        <div class="grid gap-8 lg:grid-cols-[1.15fr,0.85fr]">
+            <section class="glass p-6 md:p-8">
+                <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold">Build your QR</h2>
+                        <p class="text-slate-600 mt-2">Create links, Wi-Fi access, messages, and more with precise
+                            controls.</p>
+                    </div>
+                    <label class="flex items-center gap-3 text-sm text-slate-600">
+                        Auto update
+                        <input id="auto-generate" class="toggle" type="checkbox">
+                    </label>
+                </div>
+
+                <form id="generate-form" class="mt-6 space-y-6">
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <label class="field-label" for="data-type">Content type</label>
+                            <select id="data-type" class="field">
+                                <option value="url">URL</option>
+                                <option value="text">Text</option>
+                                <option value="wifi">Wi-Fi</option>
+                                <option value="email">Email</option>
+                                <option value="sms">SMS</option>
+                                <option value="phone">Phone</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="field-label" for="size">Size</label>
+                            <div class="flex items-center gap-3">
+                                <input id="size" type="range" min="180" max="720" step="20" value="320"
+                                    class="w-full">
+                                <span id="size-value" class="text-sm font-semibold text-slate-600 w-16 text-right">320px</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3" data-type-group="url">
+                        <label class="field-label" for="url">Website URL</label>
+                        <input type="url" id="url" class="field" placeholder="https://example.com" required>
+                        <p class="helper">Include https:// for best scan results.</p>
+                    </div>
+
+                    <div class="space-y-3 hidden" data-type-group="text">
+                        <label class="field-label" for="text">Plain text</label>
+                        <textarea id="text" rows="3" class="field" placeholder="Type any message"></textarea>
+                    </div>
+
+                    <div class="space-y-4 hidden" data-type-group="wifi">
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div class="space-y-2">
+                                <label class="field-label" for="wifi-ssid">Network name (SSID)</label>
+                                <input id="wifi-ssid" class="field" placeholder="CoffeeShop Wi-Fi">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="field-label" for="wifi-password">Password</label>
+                                <input id="wifi-password" type="password" class="field" placeholder="Optional">
+                            </div>
+                        </div>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div class="space-y-2">
+                                <label class="field-label" for="wifi-encryption">Encryption</label>
+                                <select id="wifi-encryption" class="field">
+                                    <option value="WPA">WPA/WPA2</option>
+                                    <option value="WEP">WEP</option>
+                                    <option value="nopass">None</option>
+                                </select>
+                            </div>
+                            <label class="flex items-center gap-3 text-sm text-slate-600 mt-7">
+                                <input id="wifi-hidden" type="checkbox" class="h-4 w-4">
+                                Hidden network
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 hidden" data-type-group="email">
+                        <div class="space-y-2">
+                            <label class="field-label" for="email-to">Recipient</label>
+                            <input id="email-to" type="email" class="field" placeholder="hello@brand.com">
+                        </div>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div class="space-y-2">
+                                <label class="field-label" for="email-subject">Subject</label>
+                                <input id="email-subject" class="field" placeholder="Project inquiry">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="field-label" for="email-body">Message</label>
+                                <input id="email-body" class="field" placeholder="Short note">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 hidden" data-type-group="sms">
+                        <div class="space-y-2">
+                            <label class="field-label" for="sms-number">Phone number</label>
+                            <input id="sms-number" class="field" placeholder="+1 555 000 000">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="field-label" for="sms-message">Message</label>
+                            <input id="sms-message" class="field" placeholder="Optional text">
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 hidden" data-type-group="phone">
+                        <label class="field-label" for="phone-number">Phone number</label>
+                        <input id="phone-number" class="field" placeholder="+1 555 000 000">
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <label class="field-label" for="color-dark">QR color</label>
+                            <input id="color-dark" type="color" class="color-field" value="#1f2937">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="field-label" for="color-light">Background</label>
+                            <input id="color-light" type="color" class="color-field" value="#ffffff">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="field-label" for="error-level">Error correction</label>
+                        <select id="error-level" class="field">
+                            <option value="L">Low (L)</option>
+                            <option value="M" selected>Medium (M)</option>
+                            <option value="Q">Quartile (Q)</option>
+                            <option value="H">High (H)</option>
+                        </select>
+                        <p class="helper">Higher levels keep QR codes scannable when partially covered.</p>
+                    </div>
+
+                    <div class="flex flex-col gap-3 md:flex-row">
+                        <button type="submit" class="btn btn-primary w-full md:w-auto">Generate QR</button>
+                        <button type="button" id="reset-btn" class="btn btn-secondary w-full md:w-auto">Reset</button>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs uppercase tracking-wide text-slate-500">Payload preview</p>
+                            <button type="button" id="copy-payload"
+                                class="text-sm font-medium text-slate-600 hover:text-slate-900">Copy payload</button>
+                        </div>
+                        <code id="payload-preview">Add content to see the payload preview.</code>
+                    </div>
+                    <p id="status" class="text-sm text-slate-600" data-tone="info"></p>
                 </form>
+            </section>
 
-            </div>
-            <div class="d2 w-full md:w-1/3 self-center"><img src="img/qr-code.svg" alt=""
-                    class="w-1/2 m-auto mb-10 md:w-full"></div>
+            <section class="glass p-6 md:p-8">
+                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold">Preview</h2>
+                        <p class="text-slate-600 mt-2">Download or copy once your QR is ready.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a id="download-btn" class="btn btn-primary btn-small is-disabled" href="#"
+                            download="qrcode.png">Download PNG</a>
+                        <button id="copy-image" type="button" class="btn btn-secondary btn-small">Copy image</button>
+                    </div>
+                </div>
 
+                <div class="mt-6 qr-frame">
+                    <div id="qrcode">
+                        <div id="qr-placeholder">Generate a QR code to see it here.</div>
+                    </div>
+                </div>
 
-        </div>
-        <!-- Generated QR Code  -->
-        <div id="generated" class="max-w-5xl m-auto flex flex-col text-center align-center justify-center mt-20">
-            <!-- Spinner -->
-            <!-- Spinner -->
-            <div id="spinner" role="status">
-                <svg class="inline mr-2 w-24 h-24 text-gray-200 animate-spin dark:text-gray-600 fill-pink-600"
-                    viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                        fill="currentColor" />
-                    <path
-                        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                        fill="currentFill" />
-                </svg>
-                <span class="sr-only">Loading...</span>
-            </div>
-
-            <!-- QR Code output -->
-            <div class="m-auto" id="qrcode"></div>
+                <div class="mt-6 grid gap-3 text-sm text-slate-600">
+                    <div class="flex items-center gap-2">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                        Auto layout adapts to mobile and desktop.
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="h-2 w-2 rounded-full bg-blue-500"></span>
+                        Export sharp PNG files for print or web.
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                        Use high error correction for logos and stickers.
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
-
-
-
-
-
 
     <script src="js/script.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
